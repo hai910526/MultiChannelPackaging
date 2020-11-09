@@ -1,0 +1,6 @@
+include ':aschannel'
+include ':walle_jiagu'
+include ':walle'
+include ':umeng'
+include ':app'
+rootProject.name = "MultiChannelPackaging"

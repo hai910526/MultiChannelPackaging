@@ -1,0 +1,114 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.2"
+
+    defaultConfig {
+        applicationId "com.zly.umeng"
+        minSdkVersion 16
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        // AS3.0之后：原因就是使用了productFlavors分包，解决方法就是在build.gradle中的defaultConfig中
+        // 添加一个flavorDimensions "1"就可以了，后面的1一般是跟你的versionCode相同
+        flavorDimensions "1"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    //打包签名文件
+    signingConfigs {
+        config {
+            storeFile file('../yipingcankey.jks')
+            storePassword '88888888'
+            keyAlias '上海'
+            keyPassword '88888888'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+    }
+
+    /*  productFlavors {
+          yingyongbao {
+              manifestPlaceholders = [UMENG_CHANNEL_VALUE: "yingyongbao"]
+          }
+
+          huawei {
+              manifestPlaceholders = [UMENG_CHANNEL_VALUE: "huawei"]
+          }
+
+          xiaomi {
+              manifestPlaceholders = [UMENG_CHANNEL_VALUE: "xiaomi"]
+          }
+
+          oppo {
+              manifestPlaceholders = [UMENG_CHANNEL_VALUE: "oppo"]
+          }
+
+          vivo {
+              manifestPlaceholders = [UMENG_CHANNEL_VALUE: "vivo"]
+          }
+      }*/
+
+    //上面只是几个渠道，如果有几十个渠道，都这样写，重复的东西太多，观察到每个渠道就是flavor的名称，所以修改如下：
+    productFlavors {
+        yingyongbao {}
+        huawei {}
+        xiaomi {}
+        oppo {}
+        vivo {}
+    }
+
+    productFlavors.all { flavor ->
+        flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+    }
+
+    //设置打包apk名字
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def buildTypeName = variant.buildType.name
+            def versionName = defaultConfig.versionName
+            def channelName = variant.productFlavors[0].name
+            // 多渠道打包的时候，后台不支持中文
+            outputFileName = "app-v${versionName}-${buildTypeName}-${buildTime()}-${channelName}.apk"
+
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+static def buildTime() {
+    def date = new Date()
+    def formattedDate = date.format('MMddHHmmss')
+    return formattedDate
+}
+
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}
